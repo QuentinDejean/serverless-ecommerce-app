@@ -1,9 +1,16 @@
 service: serverless-ecommerce-app
 
+custom:
+  restaurantTableName: restaurants
+
 provider:
   name: aws
   runtime: nodejs12.x
   region: ap-southeast-2
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-pseudo-parameters
 
 functions:
   getIndex:
@@ -12,3 +19,32 @@ functions:
       - http:
           path: /
           method: get
+  getRestaurants:
+    handler: functions/getRestaurants.handler
+    events:
+      - http:
+          path: /restaurants/
+          method: get
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:scan
+        Resource: arn:aws:dynamodb:${self:provider.region}:#{AWS::AccountId}:table/${self:custom.restaurantTableName}
+    environment:
+      restaurantTable: ${self:custom.restaurantTableName}
+
+
+resources:
+  Resources:
+    restaurantTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.restaurantTableName}
+        AttributeDefinitions:
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
