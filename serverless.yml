@@ -1,0 +1,14 @@
+service: serverless-ecommerce-app
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-southeast-2
+
+functions:
+  getIndex:
+    handler: functions/getIndex.handler
+    events:
+      - http:
+          path: /
+          method: get
