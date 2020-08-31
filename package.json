@@ -10,7 +10,10 @@
     "license": "ISC",
     "dependencies": {
         "aws-sdk": "^2.735.0",
-        "bluebird": "^3.7.2"
+        "aws4-axios": "^1.12.0",
+        "axios": "^0.19.2",
+        "bluebird": "^3.7.2",
+        "mustache": "^4.0.1"
     },
     "devDependencies": {
         "serverless-iam-roles-per-function": "^2.0.2",

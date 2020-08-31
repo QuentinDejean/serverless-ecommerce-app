@@ -7,6 +7,7 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: ap-southeast-2
+  stage: ${opt:stage, 'dev'}
 
 plugins:
   - serverless-iam-roles-per-function
@@ -19,12 +20,22 @@ functions:
       - http:
           path: /
           method: get
+    iamRoleStatements:
+      - Effect: Allow
+        Action: execute-api:Invoke
+        Resource: arn:aws:execute-api:${self:provider.region}:#{AWS::AccountId}:*/*/GET/restaurants
+    environment:
+      # TODO: find a way to point to this programmatically
+      RESTAURANT_API: https://svymw9tunl.execute-api.ap-southeast-2.amazonaws.com/dev
+      REGION: ${self:provider.region}
+
   getRestaurants:
     handler: functions/getRestaurants.handler
     events:
       - http:
           path: /restaurants/
           method: get
+          authorizer: aws_iam
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:scan
