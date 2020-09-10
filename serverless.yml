@@ -28,6 +28,8 @@ functions:
       # TODO: find a way to point to this programmatically
       RESTAURANT_API: https://svymw9tunl.execute-api.ap-southeast-2.amazonaws.com/dev
       REGION: ${self:provider.region}
+      COGNITO_USER_POOL_ID: ap-southeast-2_kAlQ39eSA
+      COGNITO_CLIENT_ID: 57t2dd7nsrsi9vrj50osv2mtnk
 
   getRestaurants:
     handler: functions/getRestaurants.handler
@@ -43,6 +45,20 @@ functions:
     environment:
       restaurantTable: ${self:custom.restaurantTableName}
 
+  searchRestaurants:
+    handler: functions/searchRestaurants.handler
+    events:
+      - http:
+          path: /restaurants/search
+          method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:ap-southeast-2:116526670487:userpool/ap-southeast-2_kAlQ39eSA
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:scan
+        Resource: arn:aws:dynamodb:${self:provider.region}:#{AWS::AccountId}:table/${self:custom.restaurantTableName}
+    environment:
+      restaurantTable: ${self:custom.restaurantTableName}
 
 resources:
   Resources:
