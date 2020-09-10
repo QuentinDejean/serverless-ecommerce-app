@@ -6,6 +6,8 @@ const { aws4Interceptor } = require("aws4-axios");
 
 const restaurantsAPIRoot = process.env.RESTAURANT_API;
 const region = process.env.REGION;
+const cognitoUserPoolId = process.env.COGNITO_USER_POOL_ID;
+const cognitoClientId = process.env.COGNITO_CLIENT_ID;
 
 const interceptor = aws4Interceptor({
   region,
@@ -42,8 +44,11 @@ module.exports.handler = async event => {
 
   const restaurants = await getRestaurants();
   const dayOfWeek = days[new Date().getDay()];
+  const view = {
+    dayOfWeek, restaurants, awsRegion: region, cognitoUserPoolId, cognitoClientId, searchUrl: `${restaurantsAPIRoot}/restaurants/search`
+  }
   
-  const html = Mustache.render(template, { dayOfWeek, restaurants });
+  const html = Mustache.render(template, view);
 
   const response = {
     statusCode: 200,
