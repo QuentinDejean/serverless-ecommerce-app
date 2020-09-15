@@ -1,4 +1,6 @@
 # package directories
+.vscode
+.debug
 node_modules
 jspm_packages
 
