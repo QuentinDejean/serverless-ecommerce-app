@@ -1,23 +1,24 @@
 {
-    "name": "serverless-ecommerce-app",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "aws-sdk": "^2.735.0",
-        "aws4-axios": "^1.12.0",
-        "axios": "^0.19.2",
-        "bluebird": "^3.7.2",
-        "mustache": "^4.0.1"
-    },
-    "devDependencies": {
-        "serverless": "^2.0.0",
-        "serverless-iam-roles-per-function": "^2.0.2",
-        "serverless-pseudo-parameters": "^2.5.0"
-    }
+  "name": "serverless-ecommerce-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "sls deploy"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.735.0",
+    "aws4-axios": "^1.12.0",
+    "axios": "^0.19.2",
+    "bluebird": "^3.7.2",
+    "mustache": "^4.0.1"
+  },
+  "devDependencies": {
+    "serverless": "^2.0.0",
+    "serverless-iam-roles-per-function": "^2.0.2",
+    "serverless-pseudo-parameters": "^2.5.0"
+  }
 }
