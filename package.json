@@ -14,7 +14,8 @@
     "aws4-axios": "^1.12.0",
     "axios": "^0.19.2",
     "bluebird": "^3.7.2",
-    "mustache": "^4.0.1"
+    "mustache": "^4.0.1",
+    "uuid": "^8.3.0"
   },
   "devDependencies": {
     "serverless": "^2.0.0",

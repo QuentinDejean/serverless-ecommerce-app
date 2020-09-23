@@ -2,6 +2,7 @@ service: serverless-ecommerce-app
 
 custom:
   restaurantTableName: restaurants
+  orderEventsStreamName: orderEvents
 
 provider:
   name: aws
@@ -45,6 +46,22 @@ functions:
     environment:
       restaurantTable: ${self:custom.restaurantTableName}
 
+  placeOrder:
+    handler: functions/placeOrder.handler
+    events:
+      - http:
+          path: /order
+          method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:${self:provider.region}:#{AWS::AccountId}:userpool/${self:provider.region}_kAlQ39eSA
+    iamRoleStatementsName: ecommerce-${self:provider.stage}-placeOrder-${self:provider.region}-lambdaRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource: arn:aws:kinesis:${self:provider.region}:#{AWS::AccountId}:stream/${self:custom.orderEventsStreamName}
+    environment:
+      orderEventStream: ${self:custom.orderEventsStreamName}
+
   searchRestaurants:
     handler: functions/searchRestaurants.handler
     events:
@@ -52,7 +69,7 @@ functions:
           path: /restaurants/search
           method: post
           authorizer:
-            arn: arn:aws:cognito-idp:ap-southeast-2:116526670487:userpool/ap-southeast-2_kAlQ39eSA
+            arn: arn:aws:cognito-idp:${self:provider.region}:#{AWS::AccountId}:userpool/${self:provider.region}_kAlQ39eSA
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:scan
@@ -75,3 +92,9 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+    orderEventsStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: ${self:custom.orderEventsStreamName}
+        ShardCount: 1
