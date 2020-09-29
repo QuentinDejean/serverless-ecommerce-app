@@ -3,6 +3,7 @@ service: serverless-ecommerce-app
 custom:
   restaurantTableName: restaurants
   orderEventsStreamName: orderEvents
+  restaurantTopicName: restaurantNotification
 
 provider:
   name: aws
@@ -27,7 +28,7 @@ functions:
         Resource: arn:aws:execute-api:${self:provider.region}:#{AWS::AccountId}:*/*/GET/restaurants
     environment:
       # TODO: find a way to point to this programmatically
-      RESTAURANT_API: https://svymw9tunl.execute-api.ap-southeast-2.amazonaws.com/dev
+      RESTAURANT_API: https://v4t6fxxhhe.execute-api.ap-southeast-2.amazonaws.com/dev
       REGION: ${self:provider.region}
       COGNITO_USER_POOL_ID: ap-southeast-2_kAlQ39eSA
       COGNITO_CLIENT_ID: 57t2dd7nsrsi9vrj50osv2mtnk
@@ -77,6 +78,22 @@ functions:
     environment:
       restaurantTable: ${self:custom.restaurantTableName}
 
+  notifyRestaurant:
+    handler: functions/notifyRestaurant.handler
+    events:
+      - stream:
+          arn: arn:aws:kinesis:${self:provider.region}:#{AWS::AccountId}:stream/${self:custom.orderEventsStreamName}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: sns:Publish
+        Resource: arn:aws:sns:${self:provider.region}:#{AWS::AccountId}:${self:custom.restaurantTopicName}
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource: arn:aws:kinesis:${self:provider.region}:#{AWS::AccountId}:stream/${self:custom.orderEventsStreamName}
+    environment:
+      orderEventStream: ${self:custom.orderEventsStreamName}
+      restaurantNotificationTopic: arn:aws:sns:${self:provider.region}:#{AWS::AccountId}:${self:custom.restaurantTopicName}
+
 resources:
   Resources:
     restaurantTable:
@@ -98,3 +115,9 @@ resources:
       Properties:
         Name: ${self:custom.orderEventsStreamName}
         ShardCount: 1
+
+    restaurantNotificationTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:custom.restaurantTopicName}
+        TopicName: ${self:custom.restaurantTopicName}

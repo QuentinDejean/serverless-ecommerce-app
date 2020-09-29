@@ -1,6 +1,9 @@
 const AWS = require("aws-sdk");
-const { v4: uuidv4 } = require("uuid");
+
+const { ORDER_PLACED } = require("../constants/order");
+
 const kinesis = new AWS.Kinesis();
+const { v4: uuidv4 } = require("uuid");
 
 const streamName = process.env.orderEventStream;
 
@@ -14,7 +17,7 @@ const placeOrder = async (event) => {
     `Placing order ID ${orderId} to ${restaurantName} from user ${userEmail}`
   );
 
-  const eventType = "order_placed";
+  const eventType = ORDER_PLACED;
 
   const data = {
     orderId,
@@ -31,7 +34,7 @@ const placeOrder = async (event) => {
 
   await kinesis.putRecord(payload).promise();
 
-  console.log(`Published ${eventType} to Kinesis`);
+  console.log(`Published ${eventType} event to Kinesis`);
 
   return {
     statusCode: 200,
