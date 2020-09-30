@@ -47,6 +47,20 @@ functions:
     environment:
       restaurantTable: ${self:custom.restaurantTableName}
 
+  acceptOrder:
+    handler: functions/acceptOrder.handler
+    events:
+      - http:
+          path: /order/accept
+          method: post
+    iamRoleStatementsName: ecommerce-${self:provider.stage}-acceptOrder-${self:provider.region}-lambdaRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource: arn:aws:kinesis:${self:provider.region}:#{AWS::AccountId}:stream/${self:custom.orderEventsStreamName}
+    environment:
+      orderEventStream: ${self:custom.orderEventsStreamName}
+
   placeOrder:
     handler: functions/placeOrder.handler
     events:
