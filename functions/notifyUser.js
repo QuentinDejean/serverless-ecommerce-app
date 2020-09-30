@@ -1,21 +1,21 @@
 const AWS = require("aws-sdk");
 
-const { ORDER_PLACED, RESTAURANT_NOTIFIED } = require("../constants/order");
+const { ORDER_ACCEPTED, USER_NOTIFIED } = require("../constants/order");
 const { getRecords } = require("../libs/kinesis");
 
 const kinesis = new AWS.Kinesis();
 const sns = new AWS.SNS();
 
 const streamName = process.env.orderEventStream;
-const topicArn = process.env.restaurantNotificationTopic;
+const topicArn = process.env.userNotificationTopic;
 
-const notifyRestaurant = async (event) => {
+const notifyUser = async (event) => {
   const records = getRecords(event);
-  const orderPlaced = records.filter(
-    ({ eventType }) => eventType === ORDER_PLACED
+  const orderAccepted = records.filter(
+    ({ eventType }) => eventType === ORDER_ACCEPTED
   );
 
-  for (let order of orderPlaced) {
+  for (let order of orderAccepted) {
     const snsPayload = {
       Message: JSON.stringify(order),
       TopicArn: topicArn,
@@ -23,13 +23,11 @@ const notifyRestaurant = async (event) => {
 
     await sns.publish(snsPayload).promise();
 
-    const { restaurantName, orderId } = order;
+    const { userEmail, orderId } = order;
 
-    console.log(
-      `notified restaurant [${restaurantName}] of order [${orderId}]`
-    );
+    console.log(`notified user [${userEmail}] of order [${orderId}]`);
 
-    const eventType = RESTAURANT_NOTIFIED;
+    const eventType = USER_NOTIFIED;
 
     const data = {
       ...order,
@@ -48,4 +46,4 @@ const notifyRestaurant = async (event) => {
   }
 };
 
-module.exports.handler = notifyRestaurant;
+module.exports.handler = notifyUser;
