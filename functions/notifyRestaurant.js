@@ -45,7 +45,7 @@ const notifyRestaurant = async (event) => {
 
     await kinesis.putRecord(kinesisPayload).promise();
 
-    console.log(`Published ${eventType} event to Kinesis`);
+    console.log(`Published ${eventType} event into Kinesis`);
   }
 };
 
