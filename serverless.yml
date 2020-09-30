@@ -4,6 +4,7 @@ custom:
   restaurantTableName: restaurants
   orderEventsStreamName: orderEvents
   restaurantTopicName: restaurantNotification
+  userTopicName: userNotification
 
 provider:
   name: aws
@@ -77,6 +78,20 @@ functions:
     environment:
       orderEventStream: ${self:custom.orderEventsStreamName}
 
+  fulfillOrder:
+    handler: functions/fulfillOrder.handler
+    events:
+      - http:
+          path: /order/fulfill
+          method: post
+    iamRoleStatementsName: ecommerce-${self:provider.stage}-fulfillOrder-${self:provider.region}-lambdaRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource: arn:aws:kinesis:${self:provider.region}:#{AWS::AccountId}:stream/${self:custom.orderEventsStreamName}
+    environment:
+      orderEventStream: ${self:custom.orderEventsStreamName}
+
   searchRestaurants:
     handler: functions/searchRestaurants.handler
     events:
@@ -108,6 +123,23 @@ functions:
       orderEventStream: ${self:custom.orderEventsStreamName}
       restaurantNotificationTopic: arn:aws:sns:${self:provider.region}:#{AWS::AccountId}:${self:custom.restaurantTopicName}
 
+  notifyUser:
+    handler: functions/notifyUser.handler
+    events:
+      - stream:
+          arn: arn:aws:kinesis:${self:provider.region}:#{AWS::AccountId}:stream/${self:custom.orderEventsStreamName}
+    iamRoleStatementsName: ecommerce-${self:provider.stage}-notifyUser-${self:provider.region}-lambdaRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action: sns:Publish
+        Resource: arn:aws:sns:${self:provider.region}:#{AWS::AccountId}:${self:custom.userTopicName}
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource: arn:aws:kinesis:${self:provider.region}:#{AWS::AccountId}:stream/${self:custom.orderEventsStreamName}
+    environment:
+      orderEventStream: ${self:custom.orderEventsStreamName}
+      userNotificationTopic: arn:aws:sns:${self:provider.region}:#{AWS::AccountId}:${self:custom.userTopicName}
+
 resources:
   Resources:
     restaurantTable:
@@ -135,3 +167,9 @@ resources:
       Properties:
         DisplayName: ${self:custom.restaurantTopicName}
         TopicName: ${self:custom.restaurantTopicName}
+
+    userNotificationTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:custom.userTopicName}
+        TopicName: ${self:custom.userTopicName}
